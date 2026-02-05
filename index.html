@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quantum Emperor v23</title>
+    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root { --bg: #0b0b0d; --mci: #00a0a5; --irancell: #ffcc00; --shatel: #ed1c24; --accent: #00f2ff; }
+        body { background: var(--bg); color: #fff; font-family: 'Vazirmatn', sans-serif; padding: 15px; text-align: center; line-height: 1.6; }
+        .card { background: #16161a; border-radius: 20px; padding: 20px; border: 1px solid #333; margin-bottom: 20px; position: relative; overflow: hidden; }
+        .isp-label { display: block; text-align: right; font-weight: bold; font-size: 14px; margin-bottom: 15px; border-right: 4px solid; padding-right: 10px; }
+        .btn-group { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .btn { padding: 12px; border-radius: 12px; border: none; font-family: 'Vazirmatn'; font-weight: bold; cursor: pointer; transition: 0.2s; font-size: 12px; }
+        .btn-copy { grid-column: span 2; background: #333; color: #fff; margin-top: 8px; border: 1px solid #444; }
+        .btn-copy:active { background: var(--accent); color: #000; }
+        .btn-update { background: #fff; color: #000; width: 100%; padding: 18px; font-size: 16px; margin-bottom: 25px; border-radius: 15px; font-weight: bold; border: none; cursor: pointer; }
+        .mci-color { border-color: var(--mci); color: var(--mci); }
+        .ira-color { border-color: var(--irancell); color: var(--irancell); }
+        .sha-color { border-color: var(--shatel); color: var(--shatel); }
+    </style>
+</head>
+<body>
+
+    <h2 style="margin-bottom:5px;">امپراطور <span style="color:var(--accent)">V2Ray v23</span></h2>
+    <p style="font-size: 11px; color: #777; margin-bottom: 20px;">تزریق خودکار درگاه در هسته کانفیگ</p>
+
+    <button class="btn-update" onclick="fetchServers()">
+        <i class="fas fa-bolt"></i> دریافت و آماده‌سازی سرورها
+    </button>
+
+    <div class="card" style="border-color: var(--mci);">
+        <span class="isp-label mci-color">همراه اول (درگاه شاپرک)</span>
+        <div class="btn-group">
+            <button class="btn" style="background:var(--mci); color:#fff;" onclick="downloadFile('mci', 'sep.shaparak.ir', 'npv')">فایل NPV</button>
+            <button class="btn" style="background:var(--mci); color:#fff;" onclick="downloadFile('mci', 'sep.shaparak.ir', 'hat')">فایل HAT</button>
+            <button class="btn btn-copy" onclick="copyV2('sep.shaparak.ir')"><i class="fas fa-copy"></i> کپی لینک مستقیم V2Ray</button>
+        </div>
+    </div>
+
+    <div class="card" style="border-color: var(--irancell);">
+        <span class="isp-label ira-color">ایرانسل (درگاه اسنپ)</span>
+        <div class="btn-group">
+            <button class="btn" style="background:var(--irancell); color:#000;" onclick="downloadFile('irancell', 'snapp.ir', 'npv')">فایل NPV</button>
+            <button class="btn" style="background:var(--irancell); color:#000;" onclick="downloadFile('irancell', 'snapp.ir', 'hat')">فایل HAT</button>
+            <button class="btn btn-copy" onclick="copyV2('snapp.ir')"><i class="fas fa-copy"></i> کپی لینک مستقیم V2Ray</button>
+        </div>
+    </div>
+
+    <div class="card" style="border-color: var(--shatel);">
+        <span class="isp-label sha-color">شاتل / ثابت (درگاه موبایل)</span>
+        <div class="btn-group">
+            <button class="btn" style="background:var(--shatel); color:#fff;" onclick="downloadFile('shatel', 'app.shatelmobile.ir', 'npv')">فایل NPV</button>
+            <button class="btn" style="background:var(--shatel); color:#fff;" onclick="downloadFile('shatel', 'app.shatelmobile.ir', 'hat')">فایل HAT</button>
+            <button class="btn btn-copy" onclick="copyV2('app.shatelmobile.ir')"><i class="fas fa-copy"></i> کپی لینک مستقیم V2Ray</button>
+        </div>
+    </div>
+
+    <script>
+        let pool = [];
+
+        async function fetchServers() {
+            const b = document.querySelector('.btn-update');
+            b.innerText = 'درحال تزریق درگاه...';
+            try {
+                const r = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent("https://raw.githubusercontent.com/yebekhe/TVC/main/subscriptions/protocols/reality")}`);
+                const d = await r.json();
+                pool = d.contents.match(/vless:\/\/[^\s|\x22]+/gi) || [];
+                b.innerHTML = '<i class="fas fa-check"></i> تزریق با موفقیت انجام شد';
+                b.style.background = "#32d74b";
+            } catch (e) { b.innerText = 'خطا! دوباره تلاش کنید'; }
+        }
+
+        function inject(host) {
+            if(pool.length === 0) return null;
+            let node = pool[Math.floor(Math.random() * pool.length)];
+            // تزریق در SNI و Host
+            let mod = node.replace(/sni=[^&]*/g, 'sni=' + host);
+            mod = mod.replace(/host=[^&]*/g, 'host=' + host);
+            return mod;
+        }
+
+        function copyV2(host) {
+            let res = inject(host);
+            if(!res) { alert("اول دکمه بالا را بزنید!"); return; }
+            navigator.clipboard.writeText(res);
+            alert("لینک V2Ray با درگاه " + host + " کپی شد.");
+        }
+
+        function downloadFile(isp, host, ext) {
+            let res = inject(host);
+            if(!res) { alert("اول دکمه بالا را بزنید!"); return; }
+            const blob = new Blob([res], { type: 'text/plain' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `Quantum_${isp}_${ext}.${ext}`;
+            a.click();
+        }
+    </script>
+</body>
+</html>
