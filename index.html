@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quantum Unified v19</title>
+    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/gh/davidshimjs/qrcodejs/qrcode.min.js"></script>
+    <style>
+        :root { --bg: #050505; --card: #121215; --cyan: #00f2ff; --mci: #00a0a5; --irancell: #ffcc00; --shatel: #ed1c24; }
+        body { background: var(--bg); color: #fff; font-family: 'Vazirmatn', sans-serif; margin: 0; display: flex; flex-direction: column; min-height: 100vh; overflow-x: hidden; }
+        .header { background: #000; padding: 15px; text-align: center; border-bottom: 2px solid var(--cyan); }
+        .isp-bar { display: flex; background: #111; padding: 5px; gap: 3px; }
+        .isp-opt { flex: 1; padding: 12px 5px; border-radius: 8px; background: #1a1a1e; font-size: 10px; cursor: pointer; text-align: center; border: 1px solid #222; transition: 0.3s; color: #666; }
+        .isp-opt.active[data-isp="irancell"] { border-color: var(--irancell); color: var(--irancell); }
+        .isp-opt.active[data-isp="mci"] { border-color: var(--mci); color: var(--mci); }
+        .isp-opt.active[data-isp="shatel"] { border-color: var(--shatel); color: var(--shatel); }
+        .content { flex: 1; padding: 15px; text-align: center; }
+        .qr-area { background: #fff; padding: 12px; border-radius: 15px; display: inline-block; margin: 10px auto; border: 5px solid var(--cyan); }
+        .status-box { background: #16161a; padding: 10px; border-radius: 10px; margin: 10px 0; font-size: 11px; border-right: 3px solid var(--cyan); text-align: right; }
+        .btn-main { background: #fff; color: #000; width: 100%; border: none; padding: 18px; border-radius: 15px; font-weight: bold; font-family: 'Vazirmatn'; cursor: pointer; font-size: 15px; margin-bottom: 10px; }
+        .btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .btn-sub { background: #222; color: #fff; padding: 12px; border-radius: 10px; border: 1px solid #333; cursor: pointer; font-family: 'Vazirmatn'; font-size: 11px; }
+        #node-name { font-size: 10px; color: #777; display: block; margin-top: 5px; }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <h2 style="margin:0; font-size:18px;">QUANTUM <span style="color:var(--cyan)">UNIFIED v19</span></h2>
+</div>
+
+<div class="isp-bar">
+    <div class="isp-opt active" data-isp="irancell" onclick="setISP('irancell')">ایرانسل</div>
+    <div class="isp-opt" data-isp="mci" onclick="setISP('mci')">همراه اول</div>
+    <div class="isp-opt" data-isp="shatel" onclick="setISP('shatel')">شاتل / ثابت</div>
+</div>
+
+<div class="content">
+    <div class="status-box">
+        <i class="fas fa-satellite"></i> درگاه فعال: <span id="gt-name" style="color:var(--cyan)">sep.shaparak.ir</span>
+    </div>
+
+    <div class="qr-area" id="qr-border">
+        <div id="qrcode"></div>
+    </div>
+    <span id="node-name">در انتظار استخراج...</span>
+
+    <div style="margin-top: 20px;">
+        <button class="btn-main" onclick="runEngine()">
+            <i class="fas fa-bolt"></i> بروزرسانی و تزریق درگاه
+        </button>
+
+        <div class="btn-grid">
+            <button class="btn-sub" onclick="copyConfig()"><i class="fas fa-copy"></i> کپی V2Ray</button>
+            <button class="btn-sub" onclick="shareTG()"><i class="fab fa-telegram"></i> ارسال به تلگرام</button>
+            <button class="btn-sub" onclick="exportFile('npv')">📥 فایل NPV</button>
+            <button class="btn-sub" onclick="exportFile('hat')">📤 فایل HAT</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let currentISP = 'irancell';
+    let nodes = { irancell: [], mci: [], shatel: [] };
+    let qrcode = new QRCode(document.getElementById("qrcode"), { width: 160, height: 160 });
+
+    const configMap = {
+        irancell: { host: "snapp.ir", color: "#ffcc00" },
+        mci: { host: "sep.shaparak.ir", color: "#00a0a5" },
+        shatel: { host: "app.shatelmobile.ir", color: "#ed1c24" }
+    };
+
+    function setISP(isp) {
+        currentISP = isp;
+        document.querySelectorAll('.isp-opt').forEach(el => el.classList.remove('active'));
+        document.querySelector(`[data-isp="${isp}"]`).classList.add('active');
+        document.getElementById('gt-name').innerText = configMap[isp].host;
+        document.getElementById('qr-border').style.borderColor = configMap[isp].color;
+        if(nodes[isp].length > 0) updateView();
+    }
+
+    async function runEngine() {
+        const btn = document.querySelector('.btn-main');
+        btn.innerHTML = '<i class="fas fa-sync fa-spin"></i> در حال تحلیل...';
+        try {
+            const res = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent("https://raw.githubusercontent.com/yebekhe/TVC/main/subscriptions/protocols/reality")}`);
+            const data = await res.json();
+            const raw = data.contents.match(/(vless|reality):\/\/[^\s|\x22]+/gi) || [];
+            
+            nodes.irancell = raw.filter((_, i) => i % 3 === 0).slice(0, 15);
+            nodes.mci = raw.filter((_, i) => i % 3 === 1).slice(0, 15);
+            nodes.shatel = raw.filter((_, i) => i % 3 === 2).slice(0, 15);
+
+            updateView();
+            btn.innerHTML = '<i class="fas fa-check"></i> یکپارچه‌سازی کامل شد';
+        } catch(e) { btn.innerHTML = 'خطا در شبکه'; }
+    }
+
+    function updateView() {
+        const best = nodes[currentISP][0];
+        qrcode.clear();
+        qrcode.makeCode(best);
+        document.getElementById('node-name').innerText = "سرور بهینه شده برای " + currentISP;
+    }
+
+    function copyConfig() {
+        navigator.clipboard.writeText(nodes[currentISP].join('\n'));
+        alert("کپی شد!");
+    }
+
+    function shareTG() {
+        const text = encodeURIComponent(`🚀 Quantum v19\nISP: ${currentISP}\nHost: ${configMap[currentISP].host}\n\n${nodes[currentISP][0]}`);
+        window.open(`https://t.me/share/url?url=${text}`);
+    }
+
+    function exportFile(ext) {
+        const host = configMap[currentISP].host;
+        const payload = `GET / HTTP/1.1\r\nHost: ${host}\r\nX-Online-Host: ${host}\r\nConnection: Keep-Alive\r\n\r\n`;
+        const data = btoa(JSON.stringify({ sni: host, payload: btoa(payload), v2ray: nodes[currentISP][0] }));
+        const a = document.createElement('a');
+        a.href = 'data:text/plain;base64,' + data;
+        a.download = `Quantum_${currentISP}.${ext}`;
+        a.click();
+    }
+</script>
+</body>
+</html>
