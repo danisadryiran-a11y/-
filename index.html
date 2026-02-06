@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emperor Bridge v37</title>
+    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet">
+    <style>
+        :root { --bg: #050505; --cyan: #00f2ff; --mci: #00a0a5; --ira: #ffcc00; }
+        body { background: var(--bg); color: #fff; font-family: 'Vazirmatn', sans-serif; padding: 15px; margin: 0; text-align: center; }
+        .box { border: 2px solid #222; border-radius: 25px; padding: 25px; background: #0a0a0a; max-width: 500px; margin: 0 auto; }
+        .console { background: #000; color: #0f0; font-family: monospace; font-size: 11px; padding: 15px; border-radius: 15px; height: 150px; overflow-y: auto; text-align: left; border: 1px solid #1a1a1a; margin-bottom: 20px; }
+        .btn-ignite { background: #fff; color: #000; width: 100%; padding: 20px; border-radius: 15px; font-weight: 900; font-size: 18px; border: none; cursor: pointer; transition: 0.3s; }
+        .isp-card { background: #111; border-radius: 20px; padding: 15px; margin-top: 15px; border: 1px solid #222; display: none; }
+        .dl-btn { background: var(--cyan); color: #000; border: none; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 10px; width: 100%; }
+        .status { color: #888; font-size: 10px; margin-top: 5px; }
+    </style>
+</head>
+<body>
+
+<div class="box">
+    <h2 style="margin:0">BRIDGE <span style="color:var(--cyan)">v37</span></h2>
+    <p style="font-size:11px; color:#666;">بهینه‌سازی دسترسی به مخازن GitHub</p>
+
+    <div class="console" id="log">> سیستم آغاز به کار کرد [v37]</div>
+
+    <button class="btn-ignite" id="runBtn" onclick="fetchConfigs()">
+        🔗 دریافت کانفیگ‌ها از گیت‌هاب
+    </button>
+    
+    <div id="proxyStatus" class="status"></div>
+
+    <div id="results">
+        <div class="isp-card" id="c-mci" style="border-right: 5px solid var(--mci);">
+            <b style="color:var(--mci)">همراه اول (تزریق شاپرک)</b>
+            <div id="mci-count" class="status">0 سرور</div>
+            <button class="dl-btn" onclick="build('mci', 'sep.shaparak.ir')">دانلود فایل تزریق شده</button>
+        </div>
+        <div class="isp-card" id="c-ira" style="border-right: 5px solid var(--ira);">
+            <b style="color:var(--ira)">ایرانسل (تزریق اسنپ)</b>
+            <div id="ira-count" class="status">0 سرور</div>
+            <button class="dl-btn" style="background:var(--ira)" onclick="build('ira', 'snapp.ir')">دانلود فایل تزریق شده</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let masterData = [];
+    let configCounts = { mci: 0, ira: 0 };
+    
+    const logger = (m) => { 
+        const l = document.getElementById('log'); 
+        l.innerHTML += `<br>> ${m}`; 
+        l.scrollTop = l.scrollHeight; 
+    };
+
+    // لیست مخازن GitHub با فرمت‌های مختلف
+    const githubRepos = [
+        {
+            name: "TVC Main",
+            url: "https://raw.githubusercontent.com/yebekhe/TVC/main/subscriptions/protocols/vless"
+        },
+        {
+            name: "V2Ray Aggregator",
+            url: "https://raw.githubusercontent.com/mahdibland/V2RayAggregator/master/sub/sub_merge.txt"
+        },
+        {
+            name: "free-v2ray",
+            url: "https://raw.githubusercontent.com/3yed-3la/3la/master/Eskandari"
+        },
+        {
+            name: "v2rayNG Configs",
+            url: "https://raw.githubusercontent.com/mahdibland/ShadowsocksAggregator/master/sub/sub_merge.txt"
+        }
+    ];
+
+    // استفاده از CDN جایگزین برای GitHub
+    const githubCDNs = [
+        (url) => url, // اصلی
+        (url) => url.replace('https://raw.githubusercontent.com', 'https://cdn.jsdelivr.net/gh'),
+        (url) => url.replace('https://raw.githubusercontent.com', 'https://raw.githack.com'),
+        (url) => url.replace('https://raw.githubusercontent.com', 'https://ghproxy.com/https://raw.githubusercontent.com')
+    ];
+
+    // پروکسی‌های عمومی برای دور زدن CORS
+    const publicProxies = [
+        'https://api.allorigins.win/raw?url=',
+        'https://corsproxy.io/?',
+        'https://api.codetabs.com/v1/proxy?quest=',
+        'https://thingproxy.freeboard.io/fetch/',
+        'https://crossorigin.me/'
+    ];
+
+    async function fetchWithRetry(url, retries = 3) {
+        for (let i = 0; i < retries; i++) {
+            try {
+                // ابتدا مستقیماً امتحان می‌کنیم
+                const directResponse = await fetch(url, {
+                    method: 'GET',
+                    mode: 'cors',
+                    headers: {
+                        'Accept': 'text/plain',
+                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+                    }
+                });
+                
+                if (directResponse.ok) {
+                    return await directResponse.text();
+                }
+            } catch (directError) {
+                logger(`تلاش مستقیم ${i+1} ناموفق، استفاده از پروکسی...`);
+                
+                // استفاده از پروکسی‌های عمومی
+                for (const proxy of publicProxies) {
+                    try {
+                        const proxyUrl = proxy + encodeURIComponent(url);
+                        const response = await fetch(proxyUrl, {
+                            method: 'GET',
+                            headers: {
+                                'Accept': 'text/plain',
+                                'User-Agent': 'Mozilla/5.0'
+                            }
+                        });
+                        
+                        if (response.ok) {
+                            const text = await response.text();
+                            if (text && text.length > 100) { // بررسی اینکه پاسخ معتبر است
+                                return text;
+                            }
+                        }
+                    } catch (proxyError) {
+                        continue;
+                    }
+                }
+            }
+            
+            if (i < retries - 1) {
+                await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1)));
+            }
+        }
+        throw new Error('همه روش‌ها ناموفق بودند');
+    }
+
+    async function fetchConfigs() {
+        const btn = document.getElementById('runBtn');
+        const statusDiv = document.getElementById('proxyStatus');
+        btn.innerText = "در حال دریافت از گیت‌هاب...";
+        btn.disabled = true;
+        statusDiv.innerHTML = "⏳ در حال امتحان راه‌های مختلف...";
+        
+        masterData = [];
+        configCounts = { mci: 0, ira: 0 };
+        
+        let totalFetched = 0;
+        
+        for (const repo of githubRepos) {
+            logger(`دریافت از: ${repo.name}`);
+            
+            // امتحان CDN‌های مختلف
+            for (const cdnTransform of githubCDNs) {
+                const cdnUrl = cdnTransform(repo.url);
+                
+                try {
+                    const content = await fetchWithRetry(cdnUrl);
+                    
+                    if (content) {
+                        // استخراج لینک‌های VLESS
+                        const vlessMatches = content.match(/vless:\/\/[^\s|\x22<>]+/gi) || [];
+                        // استخراج لینک‌های VMess
+                        const vmessMatches = content.match(/vmess:\/\/[^\s|\x22<>]+/gi) || [];
+                        // استخراج لینک‌های Trojan
+                        const trojanMatches = content.match(/trojan:\/\/[^\s|\x22<>]+/gi) || [];
+                        
+                        const allMatches = [...vlessMatches, ...vmessMatches, ...trojanMatches];
+                        
+                        if (allMatches.length > 0) {
+                            masterData = [...masterData, ...allMatches];
+                            totalFetched += allMatches.length;
+                            logger(`✅ ${repo.name}: ${allMatches.length} کانفیگ یافت شد (از ${cdnUrl.split('/')[2]})`);
+                            break; // اگر با این CDN موفق شدیم، بقیه را امتحان نکنیم
+                        }
+                    }
+                } catch (error) {
+                    logger(`❌ ${repo.name} از ${cdnUrl.split('/')[2]} ناموفق`);
+                }
+            }
+        }
+        
+        // آپدیت وضعیت
+        if (masterData.length > 0) {
+            // تقسیم تصادفی کانفیگ‌ها بین اپراتورها
+            configCounts.mci = Math.floor(masterData.length / 2);
+            configCounts.ira = masterData.length - configCounts.mci;
+            
+            document.getElementById('mci-count').innerText = `${configCounts.mci} سرور`;
+            document.getElementById('ira-count').innerText = `${configCounts.ira} سرور`;
+            
+            document.querySelectorAll('.isp-card').forEach(c => c.style.display = 'block');
+            
+            btn.innerText = `✅ ${totalFetched} کانفیگ دریافت شد`;
+            btn.style.background = "#32d74b";
+            statusDiv.innerHTML = `🔄 ${masterData.length} کانفیگ آماده استفاده`;
+            
+            logger(`=== عملیات موفق ===`);
+            logger(`کل کانفیگ‌های دریافت شده: ${masterData.length}`);
+            logger(`همراه اول: ${configCounts.mci} سرور`);
+            logger(`ایرانسل: ${configCounts.ira} سرور`);
+        } else {
+            btn.innerText = "❌ دریافت ناموفق";
+            btn.style.background = "#ff453a";
+            statusDiv.innerHTML = "⚠️ لطفاً از فیلترشکن استفاده کنید و دوباره امتحان کنید";
+            logger("=== خطا: هیچ کانفیگی دریافت نشد ===");
+            btn.disabled = false;
+            
+            // پیشنهاد استفاده از فیلترشکن
+            setTimeout(() => {
+                btn.innerText = "🔄 تلاش مجدد (با فیلترشکن)";
+                btn.disabled = false;
+            }, 3000);
+        }
+    }
+
+    function build(isp, host) {
+        if (masterData.length === 0) {
+            alert("لطفاً ابتدا کانفیگ‌ها را دریافت کنید");
+            return;
+        }
+        
+        // انتخاب کانفیگ‌های مخصوص این اپراتور
+        const startIndex = isp === 'mci' ? 0 : configCounts.mci;
+        const endIndex = isp === 'mci' ? configCounts.mci : masterData.length;
+        const operatorConfigs = masterData.slice(startIndex, endIndex);
+        
+        if (operatorConfigs.length === 0) {
+            alert("هیچ کانفیگی برای این اپراتور موجود نیست");
+            return;
+        }
+        
+        const selectedConfig = operatorConfigs[Math.floor(Math.random() * operatorConfigs.length)];
+        
+        logger(`ساخت کانفیگ برای ${isp === 'mci' ? 'همراه اول' : 'ایرانسل'}...`);
+        
+        // ایجاد فایل کانفیگ
+        const configFile = {
+            remarks: `Emperor_v37_${isp.toUpperCase()}_${Date.now()}`,
+            server_configs: operatorConfigs.map((config, index) => ({
+                id: index + 1,
+                config: config,
+                sni: host,
+                host: host,
+                enabled: true
+            })),
+            metadata: {
+                generated_at: new Date().toISOString(),
+                total_configs: operatorConfigs.length,
+                target_host: host,
+                isp: isp === 'mci' ? 'MCI' : 'IR-MCI'
+            }
+        };
+        
+        const blob = new Blob([JSON.stringify(configFile, null, 2)], { type: 'application/json' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `Emperor_v37_${isp}_${Date.now()}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        
+        logger(`✅ فایل کانفیگ برای ${host} دانلود شد`);
+    }
+
+    // شروع خودکار بعد از 2 ثانیه
+    setTimeout(() => {
+        logger("> سیستم آماده دریافت کانفیگ‌هاست");
+        logger("> برای بهترین نتیجه از فیلترشکن استفاده کنید");
+    }, 2000);
+</script>
+</body>
+</html>
