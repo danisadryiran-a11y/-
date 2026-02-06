@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>Diamond Stealth Panel</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background: #010409; color: #f0f6fc; font-family: system-ui; }
+        .diamond-card { border: 1px solid #30363d; background: #0d1117; box-shadow: 0 0 40px rgba(0,0,0,0.6); }
+        .shimmer { background: linear-gradient(90deg, #238636, #2ea043, #238636); background-size: 200%; animation: move 3s linear infinite; }
+        @keyframes move { 0% { background-position: 0%; } 100% { background-position: 200%; } }
+    </style>
+</head>
+<body class="flex flex-col items-center justify-center min-h-screen p-6">
+    <div class="max-w-md w-full p-10 rounded-3xl diamond-card text-center">
+        <h1 class="text-3xl font-black mb-2 bg-gradient-to-r from-blue-400 to-cyan-500 bg-clip-text text-transparent">DIAMOND HTTP v8</h1>
+        <p class="text-[10px] text-gray-500 mb-8 tracking-[0.3em]">رمزنگاری لایه‌ای + نانو فرگمنت</p>
+        
+        <div class="space-y-4">
+            <input id="ip" type="text" placeholder="Server IP / Domain" class="w-full bg-[#161b22] border border-[#30363d] p-4 rounded-xl text-center outline-none focus:border-blue-500 text-blue-400">
+            <input id="port" type="number" placeholder="Port" class="w-full bg-[#161b22] border border-[#30363d] p-4 rounded-xl text-center outline-none focus:border-blue-500 text-blue-400">
+            <button onclick="generate()" class="shimmer w-full py-4 text-white font-bold rounded-xl shadow-lg">🔒 صدور لایسنس رمزنگاری شده</button>
+        </div>
+
+        <div id="res" class="hidden mt-6">
+            <div id="code" class="bg-black p-4 rounded-lg border border-[#30363d] break-all text-[9px] text-cyan-300 font-mono text-left mb-2 cursor-pointer" onclick="copy()"></div>
+            <p class="text-[9px] text-gray-600 italic">برای کپی روی کد کلیک کنید</p>
+        </div>
+        
+        <a href="./app-release.apk" class="mt-8 block text-xs text-blue-500 hover:underline">📥 دریافت اپلیکیشن مخصوص (APK)</a>
+    </div>
+
+    <script>
+        function generate() {
+            const ip = document.getElementById('ip').value;
+            const port = document.getElementById('port').value;
+            if(!ip || !port) return;
+            // الگوریتم رمزنگاری چند مرحله‌ای اختصاصی (HTTP Obfuscation)
+            const raw = JSON.stringify({a: ip, p: port, k: Math.random().toString(36)});
+            const enc = btoa(raw).split('').reverse().join('').split('').map(c => c.charCodeAt(0).toString(16)).join('');
+            document.getElementById('code').innerText = "DIAMOND-SEC-" + enc;
+            document.getElementById('res').classList.remove('hidden');
+        }
+        function copy() {
+            navigator.clipboard.writeText(document.getElementById('code').innerText);
+            alert("کد رمزنگاری شده کپی شد.");
+        }
+    </script>
+</body>
+</html>
