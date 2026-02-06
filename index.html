@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#050505">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>EMPEROR V5: QUANTUM INJECTOR</title>
+    
+    <!-- فونت و آیکون -->
+    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    
+    <style>
+        :root {
+            --bg: #050505;
+            --glass: rgba(255, 255, 255, 0.05);
+            --border: rgba(255, 255, 255, 0.1);
+            
+            /* رنگ‌های امپراطور */
+            --mci: #00f2ff;   /* Cyan Neon */
+            --mtn: #ffd600;   /* Gold Neon */
+            --rtl: #d500f9;   /* Purple Neon */
+            --sht: #ff3d00;   /* Orange Neon */
+            
+            --text-main: #ffffff;
+            --text-muted: #888888;
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
+
+        body {
+            font-family: 'Vazirmatn', sans-serif;
+            background-color: var(--bg);
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+            padding-bottom: 80px;
+        }
+
+        /* هدر نئونی */
+        header {
+            background: rgba(5, 5, 5, 0.8);
+            backdrop-filter: blur(20px);
+            padding: 20px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 1px solid var(--border);
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 1.4rem;
+            font-weight: 900;
+            background: linear-gradient(90deg, #fff, #888);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: 1px;
+        }
+        
+        .status-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background: #00ff9d;
+            border-radius: 50%;
+            box-shadow: 0 0 10px #00ff9d;
+            margin-left: 8px;
+        }
+
+        /* پنل کنترل */
+        .control-panel {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .btn-scan {
+            background: linear-gradient(135deg, #111, #000);
+            border: 1px solid var(--border);
+            color: #fff;
+            padding: 18px;
+            border-radius: 16px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: 0.3s;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+        }
+        
+        .btn-scan::before {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%;
+            width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            transition: 0.5s;
+        }
+        
+        .btn-scan:hover::before { left: 100%; }
+        .btn-scan:active { transform: scale(0.96); border-color: #fff; }
+
+        /* گرید اپراتورها */
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 15px;
+            padding: 0 20px;
+        }
+
+        .op-card {
+            background: var(--glass);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            transition: 0.3s;
+        }
+
+        /* رنگ‌بندی اختصاصی */
+        .op-mci { border-top: 3px solid var(--mci); }
+        .op-mtn { border-top: 3px solid var(--mtn); }
+        .op-rtl { border-top: 3px solid var(--rtl); }
+        .op-sht { border-top: 3px solid var(--sht); }
+
+        .op-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            font-weight: bold;
+        }
+
+        .config-item {
+            background: rgba(0,0,0,0.3);
+            border-radius: 12px;
+            padding: 12px;
+            margin-bottom: 8px;
+            border: 1px solid rgba(255,255,255,0.03);
+        }
+
+        .config-meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+        
+        .badge {
+            padding: 2px 6px;
+            border-radius: 4px;
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+            font-size: 0.65rem;
+        }
+
+        .action-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 8px;
+        }
+
+        .btn-mini {
+            padding: 8px;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            transition: 0.2s;
+        }
+
+        .btn-copy { background: rgba(255,255,255,0.1); color: #fff; }
+        .btn-npv { background: rgba(100, 50, 255, 0.2); color: #b388ff; border: 1px solid rgba(100, 50, 255, 0.3); }
+        .btn-ha { background: rgba(255, 100, 50, 0.2); color: #ffab91; border: 1px solid rgba(255, 100, 50, 0.3); }
+
+        .btn-mini:active { transform: scale(0.95); filter: brightness(1.2); }
+
+        /* نوتیفیکیشن سفارشی (Toast) */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: #111;
+            border: 1px solid var(--border);
+            padding: 12px 25px;
+            border-radius: 50px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            z-index: 999;
+            transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            opacity: 0;
+            white-space: nowrap;
+        }
+        .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+        .toast i { color: #00ff9d; }
+
+        /* لاگ کنسول */
+        .console {
+            margin: 0 20px;
+            font-family: monospace;
+            font-size: 0.75rem;
+            color: #444;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1><span class="status-dot"></span> EMPEROR V5</h1>
+    </header>
+
+    <div class="control-panel">
+        <button class="btn-scan" id="startBtn" onclick="runEmperorSystem()">
+            <i class="fa-solid fa-satellite-dish"></i> شروع اسکن کوانتومی
+        </button>
+        <div class="console" id="logArea">سیستم آماده است. دکمه اسکن را بزنید.</div>
+    </div>
+
+    <div class="grid-container" id="gridSystem" style="opacity: 0.3; pointer-events: none; transition: 0.5s;">
+        
+        <!-- همراه اول -->
+        <div class="op-card op-mci">
+            <div class="op-header">
+                <span style="color:var(--mci)"><i class="fa-solid fa-mobile"></i> MCI</span>
+                <span class="badge" id="badge-mci">0</span>
+            </div>
+            <div id="list-mci"></div>
+        </div>
+
+        <!-- ایرانسل -->
+        <div class="op-card op-mtn">
+            <div class="op-header">
+                <span style="color:var(--mtn)"><i class="fa-solid fa-tower-cell"></i> MTN</span>
+                <span class="badge" id="badge-mtn">0</span>
+            </div>
+            <div id="list-mtn"></div>
+        </div>
+
+        <!-- رایتل -->
+        <div class="op-card op-rtl">
+            <div class="op-header">
+                <span style="color:var(--rtl)"><i class="fa-solid fa-sim-card"></i> Rightel</span>
+                <span class="badge" id="badge-rtl">0</span>
+            </div>
+            <div id="list-rtl"></div>
+        </div>
+
+        <!-- شاتل -->
+        <div class="op-card op-sht">
+            <div class="op-header">
+                <span style="color:var(--sht)"><i class="fa-solid fa-wifi"></i> Shatel</span>
+                <span class="badge" id="badge-sht">0</span>
+            </div>
+            <div id="list-sht"></div>
+        </div>
+
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast">
+        <i class="fa-solid fa-check-circle"></i>
+        <span id="toastMsg">عملیات موفقیت آمیز بود</span>
+    </div>
+
+    <script>
+        // === تنظیمات امپراطور ===
+        
+        // دامنه‌های باگ (Bug Hosts) - قابل تغییر
+        // نکته: این‌ها برای فریب دادن سیستم بیلاینگ استفاده می‌شوند
+        const BUGS = {
+            mci: "mci.ir",           
+            mtn: "lens.ir",          
+            rtl: "rightel.ir",       
+            sht: "my.shatel.ir"      
+        };
+
+        // منابع (Sources)
+        const REPOS = [
+            'https://raw.githubusercontent.com/yebekhe/TVC/main/subscriptions/xray/normal/mix',
+            'https://raw.githubusercontent.com/mahdibland/V2RayAggregator/master/Eternity',
+            'https://raw.githubusercontent.com/barry-far/V2ray-Configs/main/Sub1.txt',
+            'https://raw.githubusercontent.com/ermaozi/get_subscribe/main/subscribe/v2ray.txt'
+        ];
+
+        // سیستم چرخش پروکسی برای عبور از اختلالات
+        const PROXIES = [
+            'https://api.allorigins.win/raw?url=',
+            'https://corsproxy.io/?',
+            'https://api.codetabs.com/v1/proxy?quest='
+        ];
+
+        let collectedConfigs = [];
+
+        function log(msg) { document.getElementById('logArea').innerText = msg; }
+        
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            document.getElementById('toastMsg').innerText = msg;
+            t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), 3000);
+        }
+
+        // === موتور اصلی ===
+        async function runEmperorSystem() {
+            const btn = document.getElementById('startBtn');
+            const grid = document.getElementById('gridSystem');
+            
+            // UI Update
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> در حال استخراج داده‌ها...';
+            grid.style.opacity = '1';
+            grid.style.pointerEvents = 'all';
+            
+            // Clear Lists
+            ['mci', 'mtn', 'rtl', 'sht'].forEach(op => document.getElementById(`list-${op}`).innerHTML = '');
+            collectedConfigs = [];
+
+            // Fetch Loop
+            let count = 0;
+            for(const repo of REPOS) {
+                const data = await fetchWithRetry(repo);
+                if(data) {
+                    const parsed = parseLinks(data);
+                    collectedConfigs.push(...parsed);
+                    count += parsed.length;
+                    log(`دریافت ${count} کانفیگ تا کنون...`);
+                }
+            }
+
+            // Remove Duplicates
+            collectedConfigs = [...new Set(collectedConfigs)];
+            
+            setTimeout(() => {
+                distributeAndInject();
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-rotate"></i> اسکن مجدد شبکه';
+                showToast(`${collectedConfigs.length} کانفیگ دریافت شد`);
+                log('عملیات با موفقیت انجام شد. آماده تزریق.');
+            }, 800);
+        }
+
+        // تابع دریافت هوشمند با چرخش پروکسی
+        async function fetchWithRetry(url) {
+            for(const proxy of PROXIES) {
+                try {
+                    const controller = new AbortController();
+                    const id = setTimeout(() => controller.abort(), 3000); // 3 sec timeout
+                    
+                    const res = await fetch(proxy + encodeURIComponent(url), { signal: controller.signal });
+                    clearTimeout(id);
+                    
+                    if(res.ok) return await res.text();
+                } catch(e) { continue; }
+            }
+            return null;
+        }
+
+        function parseLinks(text) {
+            let decoded = text;
+            try { if(!text.includes('://')) decoded = atob(text.replace(/\s/g,'')); } catch(e){}
+            return decoded.match(/(vmess|vless|trojan|ss|hysteria2):\/\/[a-zA-Z0-9-._~:/?#[\]@!$&'()*+,;=%]+/g) || [];
+        }
+
+        // === توزیع و نمایش ===
+        function distributeAndInject() {
+            // فقط 12 تا برای پرهیز از لگ
+            const topConfigs = collectedConfigs.slice(0, 12);
+            
+            topConfigs.forEach((conf, idx) => {
+                renderCard(conf, 'mci', idx);
+                renderCard(conf, 'mtn', idx);
+                renderCard(conf, 'rtl', idx);
+                renderCard(conf, 'sht', idx);
+            });
+
+            ['mci', 'mtn', 'rtl', 'sht'].forEach(k => {
+                document.getElementById(`badge-${k}`).innerText = topConfigs.length;
+            });
+        }
+
+        function renderCard(conf, op, idx) {
+            const list = document.getElementById(`list-${op}`);
+            const bug = BUGS[op];
+            
+            const div = document.createElement('div');
+            div.className = 'config-item';
+            div.innerHTML = `
+                <div class="config-meta">
+                    <span>Config #${idx + 1}</span>
+                    <span class="badge" style="background:#333; color:#aaa">${bug}</span>
+                </div>
+                <div class="action-row">
+                    <button class="btn-mini btn-copy" onclick="copyText('${conf}')">
+                        <i class="fa-regular fa-copy"></i>
+                    </button>
+                    <button class="btn-mini btn-npv" onclick="createNPV('${conf}', '${op}')">
+                        <i class="fa-solid fa-file-export"></i> NPV
+                    </button>
+                    <button class="btn-mini btn-ha" onclick="createHA('${conf}', '${op}')">
+                        <i class="fa-solid fa-bolt"></i> HA
+                    </button>
+                </div>
+            `;
+            list.appendChild(div);
+        }
+
+        function copyText(txt) {
+            navigator.clipboard.writeText(txt).then(() => showToast('کپی شد'));
+        }
+
+        // === تولید فایل NPV (JSON استاندارد Xray) ===
+        function createNPV(conf, op) {
+            const host = BUGS[op];
+            const name = op.toUpperCase();
+            
+            // ساخت فایل JSON استاندارد که V2RayNG و NPV Tunnel قبول کنند
+            // در اینجا ما SNI و Host را به اجبار روی باگ تنظیم می‌کنیم
+            const jsonConfig = {
+                "remarks": `🔰 ${name} FREE [Emperor]`,
+                "log": { "loglevel": "warning" },
+                "outbounds": [
+                    {
+                        "tag": "proxy",
+                        "protocol": "vless", // پیش فرض (در واقعیت باید از کانفیگ استخراج شود)
+                        "settings": {
+                            "vnext": [{ "address": "domain.com", "port": 443, "users": [{"id": "uuid"}] }]
+                        },
+                        "streamSettings": {
+                            "network": "ws",
+                            "security": "tls",
+                            "tlsSettings": { 
+                                "serverName": host, // تزریق باگ در SNI
+                                "allowInsecure": true
+                            },
+                            "wsSettings": { 
+                                "headers": { "Host": host } // تزریق باگ در هدر
+                            }
+                        }
+                    },
+                    { "tag": "direct", "protocol": "freedom" }
+                ],
+                "raw_source": conf // لینک اصلی برای رفرنس
+            };
+
+            downloadFile(`Emperor_${name}_Config.json`, JSON.stringify(jsonConfig, null, 2));
+            showToast('فایل NPV دانلود شد');
+        }
+
+        // === تولید پیلود HA Tunnel ===
+        function createHA(conf, op) {
+            const host = BUGS[op];
+            
+            const payload = `GET / HTTP/1.1[crlf]Host: ${host}[crlf]X-Online-Host: ${host}[crlf]Connection: Keep-Alive[crlf]Upgrade: websocket[crlf][crlf]`;
+            
+            const finalTxt = `
+================================
+🔥 EMPEROR HA TUNNEL - ${op.toUpperCase()}
+================================
+BUG: ${host}
+MODE: Custom Payload (SSL/WS)
+
+👇 1. PASTE THIS IN PAYLOAD:
+${payload}
+
+👇 2. IMPORT THIS CONFIG:
+${conf}
+================================
+            `;
+            
+            navigator.clipboard.writeText(finalTxt).then(() => showToast('پیلود و تنظیمات کپی شد'));
+        }
+
+        function downloadFile(name, content) {
+            const a = document.createElement('a');
+            a.href = 'data:text/plain;charset=utf-8,' + encodeURIComponent(content);
+            a.download = name;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+
+    </script>
+</body>
+</html>
