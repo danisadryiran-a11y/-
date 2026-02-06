@@ -1,0 +1,20 @@
+name: Build_Diamond_v8
+on: [push]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Build Android APK
+        uses: ArtemSerebriakov/buildozer-action@v1
+        with:
+          buildozer_version: stable
+          python_version: 3.9
+      - name: Deploy APK to Pages
+        run: |
+          mv bin/*.apk ./app-release.apk
+          git config --global user.name 'Diamond-Robot'
+          git config --global user.email 'robot@shadow.x'
+          git add app-release.apk
+          git commit -m "Auto-Update Diamond Build"
+          git push
