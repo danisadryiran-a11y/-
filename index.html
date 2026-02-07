@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diamond Ultra | Secure Console</title>
+    <style>
+        :root { --primary: #00d2ff; --bg: #0d1117; --card: #161b22; }
+        body { background: var(--bg); color: white; font-family: 'Segoe UI', sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        .auth-gate { background: var(--card); padding: 40px; border-radius: 20px; border: 1px solid #30363d; text-align: center; width: 320px; box-shadow: 0 10px 40px rgba(0,0,0,0.6); }
+        .builder-ui { display: none; width: 95%; max-width: 750px; background: var(--card); padding: 30px; border-radius: 20px; border: 1px solid #30363d; }
+        input, textarea { width: 100%; padding: 15px; margin: 10px 0; background: #0d1117; border: 1px solid #30363d; color: #fff; border-radius: 10px; box-sizing: border-box; outline: none; }
+        textarea { height: 350px; color: #39ff14; font-family: 'Consolas', monospace; font-size: 14px; border-color: #444; }
+        .btn { background: var(--primary); color: #000; border: none; padding: 18px; border-radius: 12px; cursor: pointer; font-weight: bold; width: 100%; font-size: 16px; transition: 0.3s ease; }
+        .btn:hover { filter: brightness(1.1); transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,210,255,0.3); }
+    </style>
+</head>
+<body>
+
+    <div id="gate" class="auth-gate">
+        <h2 style="color:var(--primary); margin-bottom: 20px;">DIAMOND AUTH</h2>
+        <input type="password" id="sysKey" placeholder="Enter System Key">
+        <button class="btn" onclick="authorize()">LOGIN</button>
+    </div>
+
+    <div id="panel" class="builder-ui">
+        <div style="display:flex; justify-content: space-between; align-items: center;">
+            <h2 style="color:var(--primary); margin:0;">Diamond Ultra v4.0</h2>
+            <code style="color:#555;">SECURITY_LOCKED</code>
+        </div>
+        <p style="color:#8b949e; font-size:13px;">Engine: ARM64-v8a | Optimized for Xiaomi 11 Pro & Samsung S24</p>
+        
+        <textarea id="pythonEditor">
+from kivy.app import App
+from kivy.uix.button import Button
+
+class DiamondApp(App):
+    def build(self):
+        return Button(
+            text="Diamond Ultra v4\n[System Encrypted]",
+            background_color=(0, 0.6, 1, 1),
+            font_size='22sp'
+        )
+
+if __name__ == "__main__":
+    DiamondApp().run()
+        </textarea>
+        
+        <button class="btn" onclick="triggerBuild()">🚀 INITIATE CLOUD COMPILATION</button>
+    </div>
+
+    <script>
+        // System Key: 3224730Mm
+        const _MASTER_KEY = "3224730Mm";
+
+        function authorize() {
+            if(document.getElementById('sysKey').value === _MASTER_KEY) {
+                document.getElementById('gate').style.display = 'none';
+                document.getElementById('panel').style.display = 'block';
+            } else { alert("ACCESS DENIED: UNAUTHORIZED KEY"); }
+        }
+
+        function triggerBuild() {
+            alert("Payload transmitted. Redirecting to build logs...");
+            const segments = window.location.pathname.split('/');
+            window.location.href = `https://github.com/${segments[segments.indexOf('github.com') + 1]}/${segments[segments.indexOf('github.com') + 2]}/actions`;
+        }
+    </script>
+</body>
+</html>
