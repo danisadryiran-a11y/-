@@ -1,4 +1,4 @@
-name: Build_And_Release
+name: Build_APK
 on: [push]
 jobs:
   build:
@@ -6,17 +6,17 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v3
-      - name: Build With Buildozer
-        uses: ArtemSerebriakov/buildozer-action@v1
+      - uses: actions/checkout@v4
+      - name: Build with Buildozer
+        uses: FarisHuyam/buildozer-action@v2
         with:
           buildozer_version: stable
           python_version: 3.9
-      - name: Push APK To Repo
+      - name: Upload APK
         run: |
-          cp bin/*.apk ./app-release.apk
-          git config --global user.name 'Diamond-Bot'
-          git config --global user.email 'bot@diamond.sh'
+          cp bin/*.apk ./app-release.apk || true
+          git config --global user.name 'github-actions'
+          git config --global user.email 'action@github.com'
           git add app-release.apk
-          git commit -m "Update APK for New Devices"
-          git push
+          git commit -m "Generated APK" || true
+          git push || true
