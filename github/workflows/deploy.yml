@@ -1,0 +1,22 @@
+name: Build_Global_APK
+on: [push]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v3
+      - name: Build Android APK
+        uses: ArtemSerebriakov/buildozer-action@v1
+        with:
+          buildozer_version: stable
+          python_version: 3.9
+      - name: Release APK
+        run: |
+          cp bin/*.apk ./app-release.apk
+          git config --global user.name 'Diamond-Build-Bot'
+          git config --global user.email 'bot@diamond.sh'
+          git add app-release.apk
+          git commit -m "Build for All Devices"
+          git push
