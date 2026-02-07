@@ -1,27 +1,20 @@
 [app]
-# مشخصات برنامه
-title = Diamond Ultra V5
-package.name = diamond.pro.max
-package.domain = com.master.code
+title = Diamond Ultra Pro
+package.name = diamondultra
+package.domain = org.iran.a11y
 source.dir = .
 source.include_exts = py,png,jpg,kv,atlas
 version = 5.0.0
+requirements = python3,kivy
 
-# نیازمندی‌های سیستمی
-requirements = python3,kivy,pillow
-
-# تنظیمات آیکون و اسپلش
-icon.filename = icon.png
+# تنظیمات گرافیکی (آیکون غیرفعال شد تا ارور ندهد)
+# icon.filename = icon.png
 orientation = portrait
-fullscreen = 0 
-# (صفر گذاشتیم تا نوار وضعیت گوشی دیده شود، حرفه‌ای‌تر است)
+fullscreen = 1
 
-# تنظیمات اندروید
+# تنظیمات فنی اندروید
 android.archs = arm64-v8a
-android.allow_backup = True
-android.accept_sdk_license = True
-android.api = 34
+android.api = 33
 android.minapi = 21
-
-# دسترسی‌ها
-android.permissions = INTERNET, ACCESS_NETWORK_STATE
+android.accept_sdk_license = True
+android.permissions = INTERNET
