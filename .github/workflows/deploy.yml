@@ -1,0 +1,22 @@
+name: Build_And_Release
+on: [push]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v3
+      - name: Build With Buildozer
+        uses: ArtemSerebriakov/buildozer-action@v1
+        with:
+          buildozer_version: stable
+          python_version: 3.9
+      - name: Push APK To Repo
+        run: |
+          cp bin/*.apk ./app-release.apk
+          git config --global user.name 'Diamond-Bot'
+          git config --global user.email 'bot@diamond.sh'
+          git add app-release.apk
+          git commit -m "Update APK for New Devices"
+          git push
