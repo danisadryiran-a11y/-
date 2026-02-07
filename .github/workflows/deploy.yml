@@ -1,0 +1,28 @@
+name: Diamond_Cloud_Build
+on: [push, workflow_dispatch]
+
+jobs:
+  build_process:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python Environment
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.9'
+
+      - name: Compile Android APK
+        uses: FarisHuyam/buildozer-action@v2
+        with:
+          buildozer_version: stable
+          python_version: 3.9
+
+      - name: Export Diamond APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: Diamond-Ultra-Artifact
+          path: bin/*.apk
