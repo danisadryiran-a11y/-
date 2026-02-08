@@ -1,4 +1,4 @@
-name: Diamond_V5_Ultimate_Build
+name: Fixed_Build_V6
 on:
   push:
     branches: [ "main" ]
@@ -8,33 +8,38 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Code
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.10'
+      # آزاد کردن فضای دیسک برای جلوگیری از ارور حافظه
+      - name: Free Disk Space
+        run: |
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /opt/ghc
+          sudo rm -rf "/usr/local/share/boost"
+          sudo rm -rf "$AGENT_TOOLSDIRECTORY"
 
-      # نصب تمام پیش‌نیازهای گرافیکی و سیستمی
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
       - name: Install Dependencies
         run: |
-          sudo apt update
-          sudo apt install -y git zip unzip autoconf automake libtool pkg-config zlib1g-dev \
-          libncurses5-dev libncursesw5-dev libtinfo6 cmake libffi-dev libssl-dev build-essential \
-          libgdbm-dev libnss3-dev libsqlite3-dev libreadline-dev tk-dev uuid-dev lzma-dev \
-          libjpeg-dev zlib1g-dev
-          pip install --user --upgrade buildozer cython virtualenv pillow
+          sudo apt-get update
+          sudo apt-get install -y build-essential libffi-dev libssl-dev python3-dev \
+          libltdl-dev zlib1g-dev git zip unzip openjdk-17-jdk autoconf libtool pkg-config
+          pip install --upgrade pip
+          pip install buildozer cython==0.29.33 virtualenv
 
-      # دستور جادویی ساخت با تایید خودکار لایسنس
-      - name: Build APK
+      - name: Build APK with Debugger
         run: |
-          export PATH=$PATH:$HOME/.local/bin
-          yes | buildozer -v android debug
+          # این دستور جلوی گیر کردن روی لایسنس را می‌گیرد
+          yes | buildozer android debug
         continue-on-error: false
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Diamond-Ultra-V5-Pro
+          name: Diamond-App-V6
           path: bin/*.apk
