@@ -1,20 +1,21 @@
 [app]
-title = Diamond Ultra Pro
-package.name = diamondultra
-package.domain = org.iran.a11y
+title = Diamond Ultra V6
+package.name = diamond.fix
+package.domain = com.v6.test
 source.dir = .
 source.include_exts = py,png,jpg,kv,atlas
-version = 5.0.0
-requirements = python3,kivy
+version = 6.0.0
 
-# تنظیمات گرافیکی (آیکون غیرفعال شد تا ارور ندهد)
+# الزامات اصلی (ساده شده برای جلوگیری از خطا)
+requirements = python3,kivy==2.2.1,kivymd,pillow
+
+# آیکون فعلا غیرفعال (برای اطمینان از ساخت فایل)
 # icon.filename = icon.png
-orientation = portrait
-fullscreen = 1
 
-# تنظیمات فنی اندروید
+orientation = portrait
+fullscreen = 0
 android.archs = arm64-v8a
+android.allow_backup = True
 android.api = 33
 android.minapi = 21
-android.accept_sdk_license = True
-android.permissions = INTERNET
+p4a.branch = master
