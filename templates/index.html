@@ -2,74 +2,12 @@
 <html lang="fa" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>چت بدون محدودیت</title>
-  <style>
-    body {font-family:system-ui, sans-serif; background:#111; color:#eee; margin:0; padding:1rem; direction:rtl;}
-    .container {max-width:900px; margin:auto;}
-    h1 {color:#0f0; text-align:center;}
-    #chat {background:#1a1a1a; border:1px solid #444; border-radius:8px; padding:1rem; height:60vh; overflow-y:auto; margin-bottom:1rem;}
-    .message {margin:0.8rem 0; padding:0.8rem; border-radius:8px;}
-    .user {background:#003d00;}
-    .ai {background:#2a004d;}
-    .input-area {display:flex; gap:0.8rem;}
-    textarea {flex:1; background:#222; color:#fff; border:1px solid #555; border-radius:6px; padding:0.8rem; font-size:1rem; resize:vertical;}
-    button {background:#0c0; color:#000; border:none; padding:0 1.5rem; border-radius:6px; cursor:pointer; font-weight:bold;}
-    button:hover {background:#0f0;}
-  </style>
+  <title>تست سایت - بدون سانسور</title>
 </head>
-<body>
-  <div class="container">
-    <h1>چت‌بات هوش مصنوعی بدون هیچ فیلتری</h1>
-    <div id="chat"></div>
-    <div class="input-area">
-      <textarea id="input" rows="3" placeholder="هر چیزی که می‌خوای بپرس ... بدون سانسور و بدون محدودیت"></textarea>
-      <button onclick="sendMessage()">ارسال</button>
-    </div>
-  </div>
-
-  <script>
-  async function sendMessage() {
-    const input = document.getElementById('input');
-    const message = input.value.trim();
-    if (!message) return;
-
-    addMessage('user', message);
-    input.value = '';
-
-    try {
-      const response = await fetch('/chat', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({message})
-      });
-      const data = await response.json();
-
-      if (data.error) {
-        addMessage('ai', 'خطا: ' + data.error);
-      } else {
-        addMessage('ai', data.reply);
-      }
-    } catch (err) {
-      addMessage('ai', 'اتصال به سرور قطع شد → ' + err.message);
-    }
-  }
-
-  function addMessage(sender, text) {
-    const chat = document.getElementById('chat');
-    const div = document.createElement('div');
-    div.className = 'message ' + sender;
-    div.innerHTML = text.replace(/\n/g, '<br>');
-    chat.appendChild(div);
-    chat.scrollTop = chat.scrollHeight;
-  }
-
-  document.getElementById('input').addEventListener('keydown', function(e) {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      sendMessage();
-    }
-  });
-  </script>
+<body style="background:#111; color:#0f0; font-family:sans-serif; text-align:center; padding:50px;">
+  <h1>سلام! سایت زنده شد 😈</h1>
+  <p>اگر این متن رو می‌بینی یعنی GitHub Pages کار می‌کنه.</p>
+  <p>حالا می‌تونیم چت‌بات بدون فیلتر رو اضافه کنیم.</p>
+  <p>زمان فعلی: February 08, 2026</p>
 </body>
 </html>
